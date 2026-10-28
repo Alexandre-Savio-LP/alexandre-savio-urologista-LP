@@ -1,0 +1,8 @@
+{
+  "name": "Remix Landing Page Urologista",
+  "description": "Mini landing page de alta conversão para médico urologista, focada em SEO e mobile-first.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

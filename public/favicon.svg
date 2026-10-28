@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="16" fill="#020617" />
+  <rect x="2" y="2" width="60" height="60" rx="14" stroke="#059669" stroke-width="2" stroke-opacity="0.4" />
+  <!-- Medical Cross with modern rounded look -->
+  <path d="M26 14C26 12.8954 26.8954 12 28 12H36C37.1046 12 38 12.8954 38 14V26H50C51.1046 26 52 26.8954 52 28V36C52 37.1046 51.1046 38 50 38H38V50C38 51.1046 37.1046 52 36 52H28C26.8954 52 26 51.1046 26 50V38H14C12.8954 38 12 37.1046 12 36V28C12 26.8954 12.8954 26 14 26H26V14Z" fill="#059669" />
+  <!-- Accent highlight -->
+  <circle cx="32" cy="32" r="4" fill="#ffffff" fill-opacity="0.9" />
+</svg>

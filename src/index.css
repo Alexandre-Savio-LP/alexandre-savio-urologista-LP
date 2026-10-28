@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@theme {
+  /* Cores Principais */
+  --color-brand-primary: #0f172a; /* slate-900 */
+  --color-brand-primary-light: #334155; /* slate-700 */
+  
+  /* Cores Secundárias */
+  --color-brand-green-light: #059669; /* emerald-600 */
+  --color-brand-green-dark: #047857; /* emerald-700 */
+  --color-brand-accent-blue: #64748b; /* slate-500 */
+  --color-brand-muted-blue: #94a3b8; /* slate-400 */
+  
+  /* Fundos */
+  --color-brand-bg-light: #F8FAFC; /* off-white nobre */
+  --color-brand-bg-dark: #f1f5f9; /* slate-100 */
+
+  /* Fontes */
+  --font-heading: "Andada Pro", serif;
+  --font-serif-display: "Andada Pro", serif;
+  --font-body: "Red Hat Mono", monospace;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-body);
+    scroll-behavior: smooth;
+    background-color: var(--color-brand-bg-light);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}

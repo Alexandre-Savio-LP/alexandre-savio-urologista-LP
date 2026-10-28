@@ -1,0 +1,9 @@
+# Robots.txt - Dr. Alexandre Sávio | Médico Urologista em Goiânia
+User-agent: *
+Allow: /
+
+# Desabilitar rastreamento de endpoints internos e assets de build
+Disallow: /api/
+
+# Sitemap index
+Sitemap: https://dralexandresavio.com.br/sitemap.xml
