@@ -51,7 +51,7 @@ export default function Home() {
 
   const faqs = [
     {
-      question: "Como funciona a consulta particular e o sistema de reembolso?",
+      question: "Como funciona a consulta particular?",
       answer: "O atendimento é exclusivamente particular para garantir uma consulta aprofundada, com tempo suficiente para ouvir suas queixas, realizar um exame clínico detalhado e definir um plano terapêutico individualizado. Ao término do atendimento, fornecemos recibo e relatório médico discriminado para que você possa solicitar o reembolso junto ao seu plano de saúde com total comodidade."
     },
     {
@@ -176,7 +176,7 @@ export default function Home() {
             
             {/* Subheadline em tom itálico elegante */}
             <p className="font-body text-slate-300 text-sm md:text-base lg:text-lg leading-relaxed mb-6 lg:mb-8 font-light lg:max-w-lg">
-              Atendimento clínico individualizado, cirurgias e acompanhamento urológico com discrição e rigor técnico em Goiânia.
+              Experiência em hospitais de referência em Goiânia, com atuação clínica, hospitalar e cirúrgica.
             </p>
             
             {/* Botão de Ação (CTA) */}

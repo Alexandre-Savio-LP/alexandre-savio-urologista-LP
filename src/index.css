@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+/* 
+ * Suporte à fonte TT Backwards para os Títulos
+ * Ao colocar o arquivo (.woff2, .otf ou .ttf) em /public/fonts/ como 'TTBackwards-Bold.woff2',
+ * ele será carregado automaticamente.
+ */
+@font-face {
+  font-family: "TT Backwards";
+  src: local("TT Backwards"),
+       local("TT Backwards Sans"),
+       local("TTBackwards"),
+       url("/fonts/TTBackwards-Bold.woff2") format("woff2");
+  font-weight: 600 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "TT Backwards";
+  src: local("TT Backwards"),
+       local("TT Backwards Sans"),
+       local("TTBackwards"),
+       url("/fonts/TTBackwards-Regular.woff2") format("woff2");
+  font-weight: 400 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   /* Cores Principais */
   --color-brand-primary: #0f172a; /* slate-900 */
@@ -15,10 +42,13 @@
   --color-brand-bg-light: #F8FAFC; /* off-white nobre */
   --color-brand-bg-dark: #f1f5f9; /* slate-100 */
 
-  /* Fontes */
-  --font-heading: "Andada Pro", serif;
-  --font-serif-display: "Andada Pro", serif;
-  --font-body: "Red Hat Mono", monospace;
+  /* Fontes conforme identidade visual solicitada */
+  /* Títulos: TT Backwards (com fallback condensado Oswald) */
+  --font-heading: "TT Backwards", "TT Backwards Sans", "Oswald", sans-serif;
+  --font-serif-display: "TT Backwards", "TT Backwards Sans", "Oswald", sans-serif;
+
+  /* Textos e complementos: Poppins */
+  --font-body: "Poppins", sans-serif;
 }
 
 @layer base {
@@ -30,5 +60,6 @@
   
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+    letter-spacing: -0.01em;
   }
 }
