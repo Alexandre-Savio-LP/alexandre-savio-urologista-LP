@@ -52,7 +52,7 @@ export default function Home() {
   const faqs = [
     {
       question: "Como funciona a consulta?",
-      answer: "O atendimento pode acontecer de forma particular ou por plano de saúde / seguro saúde. Em uma consulta aprofundada, com tempo suficiente para ouvir suas queixas, realizar um exame clínico detalhado e definir um plano terapêutico individualizado. Ao término do atendimento, fornecemos recibo e, se necessário, o relatório médico para que você possa solicitar o reembolso junto ao seu plano de saúde com total comodidade."
+      answer: "O atendimento pode acontecer de forma particular ou por plano de saúde / seguro saúde. Em uma consulta aprofundada, com tempo suficiente para ouvir suas queixas, realizar um exame clínico detalhado e definir um plano terapêutico individualizado. Ao término do atendimento, fornecemos o recibo para as consultas particulares e, se necessário, o relatório médico para que você possa solicitar o reembolso junto ao seu plano de saúde com total comodidade."
     },
     {
       question: "Quando o homem deve iniciar o acompanhamento preventivo da próstata?",
