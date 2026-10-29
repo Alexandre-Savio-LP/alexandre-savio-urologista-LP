@@ -52,7 +52,7 @@ export default function Home() {
   const faqs = [
     {
       question: "Como funciona a consulta particular?",
-      answer: "O atendimento é exclusivamente particular para garantir uma consulta aprofundada, com tempo suficiente para ouvir suas queixas, realizar um exame clínico detalhado e definir um plano terapêutico individualizado. Ao término do atendimento, fornecemos recibo e relatório médico discriminado para que você possa solicitar o reembolso junto ao seu plano de saúde com total comodidade."
+      answer: "O atendimento é exclusivamente particular para garantir uma consulta aprofundada, com tempo suficiente para ouvir suas queixas, realizar um exame clínico detalhado e definir um plano terapêutico individualizado. Ao término do atendimento, fornecemos recibo e, se necessário, o relatório médico para que você possa solicitar o reembolso junto ao seu plano de saúde com total comodidade."
     },
     {
       question: "Quando o homem deve iniciar o acompanhamento preventivo da próstata?",
