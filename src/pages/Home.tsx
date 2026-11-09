@@ -42,6 +42,56 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const container = document.getElementById('doctoralia-widget-container');
+    const enforceHttpsOnIframe = (root: ParentNode | null) => {
+      if (!root) return;
+      const iframes = root.querySelectorAll('iframe');
+      iframes.forEach((iframe) => {
+        const rawSrc = iframe.getAttribute('src') || iframe.src;
+        if (rawSrc && (rawSrc.startsWith('//') || rawSrc.startsWith('http://'))) {
+          iframe.src = rawSrc.replace(/^(http:)?\/\//i, 'https://');
+        }
+      });
+    };
+
+    const observer = new MutationObserver(() => {
+      enforceHttpsOnIframe(container);
+    });
+
+    if (container) {
+      observer.observe(container, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
+      enforceHttpsOnIframe(container);
+    }
+
+    const existingScript = document.getElementById('zl-widget-s') as HTMLScriptElement | null;
+    if (
+      existingScript &&
+      (existingScript.dataset.loaded === 'true' || !existingScript.getAttribute('src')?.startsWith('https://'))
+    ) {
+      existingScript.remove();
+    }
+
+    (function ($_x: Document, _s: string, id: string) {
+      let js: HTMLScriptElement;
+      const fjs = $_x.getElementsByTagName(_s)[0];
+      if (!$_x.getElementById(id)) {
+        js = $_x.createElement(_s) as HTMLScriptElement;
+        js.id = id;
+        js.src = 'https://platform.docplanner.com/js/widget.js';
+        js.onload = () => {
+          js.dataset.loaded = 'true';
+          enforceHttpsOnIframe(container);
+        };
+        fjs?.parentNode?.insertBefore(js, fjs);
+      }
+    })(document, 'script', 'zl-widget-s');
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -1098,6 +1148,24 @@ export default function Home() {
               </div>
             </div>
 
+          </div>
+
+          {/* Widget de Agendamento Online Doctoralia */}
+          <div id="doctoralia-widget-container" className="mt-10 bg-white rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/10">
+            <a
+              id="zl-url"
+              className="zl-url"
+              href="https://www.doctoralia.com.br/alexandre-savio-oliveira-de-freitas/urologista/goiania"
+              rel="nofollow"
+              data-zlw-doctor="alexandre-savio-oliveira-de-freitas"
+              data-zlw-type="big_with_calendar"
+              data-zlw-opinion="false"
+              data-zlw-hide-branding="true"
+              data-zlw-saas-only="true"
+              data-zlw-a11y-title="Widget de marcação de consultas médicas"
+            >
+              Marque uma consulta
+            </a>
           </div>
         </div>
       </section>
