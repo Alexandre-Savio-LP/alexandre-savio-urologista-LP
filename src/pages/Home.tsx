@@ -99,26 +99,39 @@ export default function Home() {
     });
   };
 
+  const healthPlans = [
+    "Unimed",
+    "Geap Saúde",
+    "Caixa Saúde",
+    "AFFEGO",
+    "Itaú Saúde"
+  ];
+
   const faqs = [
     {
-      question: "Como funciona a consulta?",
-      answer: "O atendimento pode acontecer de forma particular ou por plano de saúde / seguro saúde. Em uma consulta aprofundada, com tempo suficiente para ouvir suas queixas, realizar um exame clínico detalhado e definir um plano terapêutico individualizado. Ao término do atendimento, fornecemos o recibo para as consultas particulares e, se necessário, o relatório médico para que você possa solicitar o reembolso junto ao seu plano de saúde com total comodidade."
+      question: "Quais planos de saúde e convênios o Dr. Alexandre Sávio atende em Goiânia?",
+      answer: "Realizamos atendimentos particulares e também atendemos pelos principais planos de saúde e convênios médicos em Goiânia, incluindo Unimed, Geap Saúde, Caixa Saúde, AFFEGO, Itaú Saúde e outros convênios. Como as regras de cobertura e elegibilidade podem variar conforme a categoria do seu plano ou a unidade de atendimento (Edifício das Clínicas ou Hospital do Rim), entre em contato com a nossa equipe pelo WhatsApp ou telefone para confirmar se o seu plano de saúde é aceito e agendar sua consulta.",
+      plans: healthPlans
     },
     {
-      question: "Quando o homem deve iniciar o acompanhamento preventivo da próstata?",
-      answer: "A recomendação da Sociedade Brasileira de Urologia (SBU) é iniciar as consultas de rotina a partir dos 50 anos. Para homens com histórico de câncer de próstata em familiares de primeiro grau (pai ou irmãos) ou homens negros, o acompanhamento deve começar mais cedo, aos 45 anos."
+      question: "Como funciona a consulta urológica particular e por plano de saúde?",
+      answer: "O atendimento pode acontecer de forma particular ou por plano de saúde / seguro saúde (como Unimed, Geap Saúde, Caixa Saúde, AFFEGO, Itaú Saúde e outros). Em uma consulta aprofundada, dedicamos tempo suficiente para ouvir suas queixas, realizar um exame clínico detalhado e definir um plano terapêutico individualizado. Ao término do atendimento, fornecemos o recibo para as consultas particulares e, se necessário, o relatório médico para que você possa solicitar o reembolso junto ao seu plano de saúde com total comodidade."
     },
     {
-      question: "Como é a recuperação e o preparo para a cirurgia de Vasectomia?",
-      answer: "A vasectomia é um procedimento cirúrgico seguro, rápido e com anestesia local. O retorno às atividades leves de escritório ocorre geralmente em 48 a 72 horas. Em consulta prévia, explicamos minuciosamente todas as etapas, orientações pré-operatórias e os prazos para a confirmação de espermograma de controle."
+      question: "Quando o homem deve iniciar o acompanhamento preventivo da próstata com o urologista?",
+      answer: "A recomendação da Sociedade Brasileira de Urologia (SBU) é iniciar as consultas de rotina com o médico urologista a partir dos 50 anos. Para homens com histórico de câncer de próstata em familiares de primeiro grau (pai ou irmãos) ou homens negros, o acompanhamento preventivo deve começar mais cedo, aos 45 anos."
+    },
+    {
+      question: "Como é a recuperação e o preparo para a cirurgia de Vasectomia em Goiânia?",
+      answer: "A vasectomia é um procedimento cirúrgico urológico seguro, rápido e realizado com anestesia local. O retorno às atividades leves de escritório ocorre geralmente em 48 a 72 horas. Em consulta prévia, explicamos minuciosamente todas as etapas, orientações pré-operatórias, documentação necessária e os prazos para a confirmação pelo espermograma de controle."
     },
     {
       question: "Quais são as opções modernas para tratamento de cálculos renais (pedras nos rins)?",
-      answer: "A conduta varia conforme a dimensão e localização do cálculo. Dispomos de abordagens clínicas medicamentosas e procedimentos minimamente invasivos (como a ureterolitotripsia a laser), que fragmentam o cálculo sem necessidade de incisões externas, proporcionando alívio rápido da dor e recuperação ágil."
+      answer: "A conduta varia conforme a dimensão e localização do cálculo renal. Dispomos de abordagens clínicas medicamentosas e procedimentos endourológicos minimamente invasivos (como a ureterolitotripsia a laser), que fragmentam o cálculo urinário sem necessidade de incisões externas, proporcionando alívio rápido da dor e recuperação ágil."
     },
     {
-      question: "O que devo levar no dia da primeira consulta médica?",
-      answer: "É altamente recomendado levar todos os exames laboratoriais de sangue e urina recentes, laudos de ultrassonografia, tomografia ou ressonância magnética anteriores, além da relação de medicamentos de uso contínuo e histórico de procedimentos prévios para enriquecer a avaliação médica."
+      question: "O que devo levar no dia da primeira consulta médica com o urologista?",
+      answer: "É altamente recomendado apresentar o documento de identificação, a carteirinha do plano de saúde (caso o atendimento seja por convênio como Unimed, Geap Saúde, Caixa Saúde, AFFEGO, Itaú Saúde ou outros), além de todos os exames laboratoriais de sangue e urina recentes, laudos de ultrassonografia, tomografia ou ressonância magnética anteriores e a relação de medicamentos de uso contínuo."
     }
   ];
 
@@ -1035,7 +1048,7 @@ export default function Home() {
                   </div>
                 </motion.div>
 
-                {/* Atendimento Particular */}
+                {/* Atendimento Particular e Planos de Saúde */}
                 <motion.div 
                   initial={{ opacity: 0, y: 15 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -1048,10 +1061,10 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-heading font-semibold text-base text-white mb-1">
-                      Atendimento Particular
+                      Atendimento Particular e Planos de Saúde
                     </h3>
                     <p className="text-slate-300 text-sm leading-relaxed font-body">
-                      Consultas com hora marcada e atenção integral.
+                      Consultas particulares e convênios (Unimed, Geap Saúde, Caixa Saúde, AFFEGO, Itaú Saúde e outros).
                     </p>
                   </div>
                 </motion.div>
@@ -1170,8 +1183,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. Perguntas Frequentes (FAQ) - Estilo Acordeão de Alta Classe */}
-      <section className="py-24 px-6 bg-[#F8FAFC] border-t border-slate-200/80">
+      {/* 6. Perguntas Frequentes (FAQ) - Estilo Acordeão de Alta Classe e Indexável (Schema.org FAQPage) */}
+      <section 
+        itemScope 
+        itemType="https://schema.org/FAQPage"
+        className="py-24 px-6 bg-[#F8FAFC] border-t border-slate-200/80"
+      >
         <div className="max-w-4xl mx-auto">
           
           <div className="text-center mb-16">
@@ -1192,6 +1209,9 @@ export default function Home() {
               return (
                 <div
                   key={index}
+                  itemScope
+                  itemProp="mainEntity"
+                  itemType="https://schema.org/Question"
                   className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm hover:border-slate-300 transition-all duration-300"
                 >
                   <button
@@ -1199,9 +1219,12 @@ export default function Home() {
                     aria-expanded={isOpen}
                     className="w-full py-6 px-6 sm:px-8 text-left flex items-center justify-between gap-4 transition-colors hover:bg-slate-50/70"
                   >
-                    <span className="font-heading font-semibold text-lg sm:text-xl md:text-2xl text-slate-900 leading-snug">
+                    <h3 
+                      itemProp="name"
+                      className="font-heading font-semibold text-lg sm:text-xl md:text-2xl text-slate-900 leading-snug"
+                    >
                       {faq.question}
-                    </span>
+                    </h3>
                     <div
                       className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border transition-all duration-300 ${
                         isOpen
@@ -1213,23 +1236,57 @@ export default function Home() {
                     </div>
                   </button>
 
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-6 sm:px-8 pb-6 pt-1 border-t border-slate-100">
-                          <p className="font-body text-slate-600 text-sm sm:text-base leading-relaxed font-light">
-                            {faq.answer}
-                          </p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {/* Mantido sempre no DOM para indexação integral pelo Googlebot */}
+                  <div
+                    itemScope
+                    itemProp="acceptedAnswer"
+                    itemType="https://schema.org/Answer"
+                    aria-hidden={!isOpen}
+                    className={`grid transition-all duration-300 ease-in-out ${
+                      isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="px-6 sm:px-8 pb-6 pt-1 border-t border-slate-100">
+                        <p 
+                          itemProp="text"
+                          className="font-body text-slate-600 text-sm sm:text-base leading-relaxed font-light"
+                        >
+                          {faq.answer}
+                        </p>
+
+                        {faq.plans && (
+                          <div className="mt-5 pt-4 border-t border-slate-100">
+                            <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+                              Principais Planos de Saúde Atendidos:
+                            </span>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {faq.plans.map((plan) => (
+                                <span
+                                  key={plan}
+                                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-900 text-xs sm:text-sm font-medium"
+                                >
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                  {plan}
+                                </span>
+                              ))}
+                              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs sm:text-sm font-medium">
+                                + Outros convênios (consultar)
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleWhatsApp('faq_planos')}
+                              className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-emerald-700 hover:text-emerald-800 underline underline-offset-4 transition-colors"
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                              <span>Clique aqui para consultar se o seu plano de saúde é aceito</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               );
             })}
@@ -1379,7 +1436,7 @@ export default function Home() {
              </div>
              <div className="flex flex-col">
                <span className="font-semibold text-sm text-slate-900 leading-tight">Dr. Alexandre Sávio</span>
-               <span className="text-[10px] text-slate-500 font-normal">Urologia Particular</span>
+               <span className="text-[10px] text-slate-500 font-normal">Particular e Convênios</span>
              </div>
           </div>
           <button 
