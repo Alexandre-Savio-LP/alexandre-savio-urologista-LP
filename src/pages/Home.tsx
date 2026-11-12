@@ -1410,13 +1410,16 @@ export default function Home() {
               Dr. Alexandre Sávio — Médico Urologista | CRM-GO 5778
             </p>
             <p className="text-xs max-w-3xl leading-relaxed mb-6 text-slate-400 font-light">
-              © {new Date().getFullYear()} Todos os direitos reservados. As informações contidas neste site têm caráter exclusivamente informativo e não substituem a consulta médica presencial. Em conformidade com o Manual de Publicidade Médica do CFM.
+              As informações contidas neste site têm caráter exclusivamente informativo e não substituem a consulta médica presencial. Em conformidade com o Manual de Publicidade Médica do CFM.
             </p>
-            <div className="flex items-center gap-4 text-xs font-medium text-slate-400">
+            <div className="flex items-center gap-4 text-xs font-medium text-slate-400 mb-6">
               <Link to="/privacidade" className="hover:text-white transition-colors underline underline-offset-4">Política de Privacidade</Link>
               <span>•</span>
               <Link to="/termos" className="hover:text-white transition-colors underline underline-offset-4">Termos de Atendimento</Link>
             </div>
+            <p className="text-xs text-slate-400 font-light">
+              © {new Date().getFullYear()} Desenvolvido por MAGE Comunicação. Todos os direitos reservados.
+            </p>
           </div>
         </div>
       </footer>
