@@ -36,6 +36,7 @@
     }
   ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/privacidade", "destination": "/index.html" },
+    { "source": "/termos", "destination": "/index.html" }
   ]
 }
