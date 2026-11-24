@@ -29,9 +29,9 @@ import {
 
 export default function Home() {
   usePageMeta({
-    title: 'Dr. Alexandre Sávio | Médico Urologista em Goiânia - CRM-GO 5778',
+    title: 'Dr. Alexandre Sávio | Urologista em Goiânia (CRM-GO 5778 | RQE 1650)',
     description:
-      'Dr. Alexandre Sávio é Médico Urologista em Goiânia (CRM-GO 5778 / RQE 1650) com mais de 30 anos de experiência. Atendimento particular e por planos de saúde (Unimed, Geap Saúde, Caixa Saúde, AFFEGO, Itaú Saúde e outros convênios) no Edifício das Clínicas e Hospital do Rim. Agende sua consulta.',
+      'Dr. Alexandre Sávio, Urologista em Goiânia (CRM-GO 5778 | RQE 1650). +30 anos em próstata, cálculo renal e vasectomia. Particular, Unimed, Geap, Caixa, AFFEGO e Itaú.',
     canonicalPath: '/',
   });
 
