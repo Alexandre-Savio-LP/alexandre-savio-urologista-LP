@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { trackWhatsAppClick, trackPhoneClick, trackExternalClick } from '../utils/analytics';
+import {
+  trackWhatsAppClick,
+  trackDoctoraliaClick,
+  trackPhoneClick,
+  trackExternalClick,
+} from '../utils/analytics';
+import { usePageMeta } from '../utils/seo';
 import { 
   MapPin, 
   Phone, 
   Clock, 
   CheckCircle2,
-  Mail,
   MessageCircle,
   Shield,
   Activity,
@@ -17,20 +22,50 @@ import {
   ArrowRight,
   ExternalLink,
   ChevronDown,
-  HelpCircle,
   ArrowUp,
   Building2,
   Instagram
 } from 'lucide-react';
 
 export default function Home() {
+  usePageMeta({
+    title: 'Dr. Alexandre Sávio | Médico Urologista em Goiânia - CRM-GO 5778',
+    description:
+      'Dr. Alexandre Sávio é Médico Urologista em Goiânia (CRM-GO 5778 / RQE 1650) com mais de 30 anos de experiência. Atendimento particular e por planos de saúde (Unimed, Geap Saúde, Caixa Saúde, AFFEGO, Itaú Saúde e outros convênios) no Edifício das Clínicas e Hospital do Rim. Agende sua consulta.',
+    canonicalPath: '/',
+  });
+
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [activeLocation, setActiveLocation] = useState<'clinicas' | 'rim'>('clinicas');
+  const doctoraliaWidgetTrackedRef = useRef(false);
+
+  const registerDoctoraliaWidgetInteraction = () => {
+    if (doctoraliaWidgetTrackedRef.current) return;
+    doctoraliaWidgetTrackedRef.current = true;
+    trackDoctoraliaClick('widget_agendamento');
+  };
+
+  useEffect(() => {
+    const handleWindowBlur = () => {
+      const container = document.getElementById('doctoralia-widget-container');
+      const activeEl = document.activeElement;
+      if (
+        container &&
+        activeEl &&
+        activeEl.tagName === 'IFRAME' &&
+        container.contains(activeEl)
+      ) {
+        registerDoctoraliaWidgetInteraction();
+      }
+    };
+
+    window.addEventListener('blur', handleWindowBlur);
+    return () => window.removeEventListener('blur', handleWindowBlur);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Exibe o botão quando rolar além do Hero (~500px)
       if (window.scrollY > 500) {
         setShowBackToTop(true);
       } else {
@@ -44,6 +79,8 @@ export default function Home() {
 
   useEffect(() => {
     const container = document.getElementById('doctoralia-widget-container');
+    if (!container) return;
+
     const enforceHttpsOnIframe = (root: ParentNode | null) => {
       if (!root) return;
       const iframes = root.querySelectorAll('iframe');
@@ -55,40 +92,62 @@ export default function Home() {
       });
     };
 
-    const observer = new MutationObserver(() => {
+    const mutationObserver = new MutationObserver(() => {
       enforceHttpsOnIframe(container);
     });
 
-    if (container) {
-      observer.observe(container, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
-      enforceHttpsOnIframe(container);
-    }
+    mutationObserver.observe(container, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['src'],
+    });
+    enforceHttpsOnIframe(container);
 
-    const existingScript = document.getElementById('zl-widget-s') as HTMLScriptElement | null;
-    if (
-      existingScript &&
-      (existingScript.dataset.loaded === 'true' || !existingScript.getAttribute('src')?.startsWith('https://'))
-    ) {
-      existingScript.remove();
-    }
+    const loadDoctoraliaWidget = () => {
+      const existingScript = document.getElementById('zl-widget-s') as HTMLScriptElement | null;
+      if (
+        existingScript &&
+        (existingScript.dataset.loaded === 'true' || !existingScript.getAttribute('src')?.startsWith('https://'))
+      ) {
+        existingScript.remove();
+      }
 
-    (function ($_x: Document, _s: string, id: string) {
-      let js: HTMLScriptElement;
-      const fjs = $_x.getElementsByTagName(_s)[0];
-      if (!$_x.getElementById(id)) {
-        js = $_x.createElement(_s) as HTMLScriptElement;
-        js.id = id;
+      if (!document.getElementById('zl-widget-s')) {
+        const js = document.createElement('script');
+        js.id = 'zl-widget-s';
+        js.async = true;
         js.src = 'https://platform.docplanner.com/js/widget.js';
         js.onload = () => {
           js.dataset.loaded = 'true';
           enforceHttpsOnIframe(container);
         };
+        const fjs = document.getElementsByTagName('script')[0];
         fjs?.parentNode?.insertBefore(js, fjs);
       }
-    })(document, 'script', 'zl-widget-s');
+    };
 
+    // Carrega o script da Doctoralia somente quando o usuário se aproximar da seção (protege TBT/LCP)
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            loadDoctoraliaWidget();
+            io.disconnect();
+          }
+        },
+        { rootMargin: '400px 0px' }
+      );
+      io.observe(container);
+      return () => {
+        io.disconnect();
+        mutationObserver.disconnect();
+      };
+    }
+
+    loadDoctoraliaWidget();
     return () => {
-      observer.disconnect();
+      mutationObserver.disconnect();
     };
   }, []);
 
@@ -148,13 +207,15 @@ export default function Home() {
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-body antialiased selection:bg-emerald-700 selection:text-white pb-20 md:pb-0">
       
       {/* 1. Header / Navbar - Integrado ao tom escuro do Hero */}
-      <nav className="fixed top-0 left-0 w-full bg-slate-950 z-50 border-b border-white/10">
+      <nav aria-label="Navegação principal" className="fixed top-0 left-0 w-full bg-slate-950 z-50 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 shrink-0">
               <img 
                 src="/heroalexandre.webp" 
                 alt="Dr. Alexandre Sávio" 
+                width={40}
+                height={40}
                 className="w-full h-full object-cover object-top"
               />
             </div>
@@ -177,15 +238,16 @@ export default function Home() {
               aria-label="Instagram do Dr. Alexandre Sávio"
               title="Siga no Instagram @dralexandresaviouro"
             >
-              <Instagram className="w-4 h-4 text-pink-400 group-hover:scale-110 group-hover:text-pink-300 transition-all duration-300" />
+              <Instagram className="w-4 h-4 text-pink-400 group-hover:scale-110 group-hover:text-pink-300 transition-all duration-300" aria-hidden="true" />
               <span className="hidden sm:inline">Instagram</span>
             </a>
 
             <button 
-              onClick={handleWhatsApp}
+              type="button"
+              onClick={() => handleWhatsApp('header')}
               className="flex items-center gap-2 border border-white/30 text-white hover:bg-white hover:text-slate-950 font-medium px-3.5 md:px-5 py-2 md:py-2.5 rounded-full transition-all duration-300 text-xs md:text-sm shadow-sm group"
             >
-              <MessageCircle className="w-4 h-4 text-emerald-400 group-hover:text-emerald-600 transition-colors" />
+              <MessageCircle className="w-4 h-4 text-emerald-400 group-hover:text-emerald-600 transition-colors" aria-hidden="true" />
               <span className="hidden sm:inline">Agendar Consulta</span>
               <span className="sm:hidden">Agendar</span>
             </button>
@@ -201,6 +263,8 @@ export default function Home() {
           <img 
             src="/heroalexandre.webp" 
             alt="Dr. Alexandre Sávio - Médico Urologista em Goiânia" 
+            width={900}
+            height={1600}
             loading="eager"
             fetchPriority="high"
             decoding="async"
@@ -232,12 +296,12 @@ export default function Home() {
               </span>
             </div>
             
-            {/* Headline (H1) em Playfair Display - Escala compacta e elegante */}
+            {/* Headline (H1) */}
             <h1 className="font-serif-display font-semibold text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl leading-snug lg:leading-tight text-white mb-4 lg:mb-6">
               Médico Urologista em Goiânia com experiência para cuidar de queixas delicadas, sintomas persistentes e casos cirúrgicos
             </h1>
             
-            {/* Subheadline em tom itálico elegante */}
+            {/* Subheadline */}
             <p className="font-body text-slate-300 text-sm md:text-base lg:text-lg leading-relaxed mb-6 lg:mb-8 font-light lg:max-w-lg">
               Experiência em hospitais de referência em Goiânia, com atuação clínica, hospitalar e cirúrgica.
             </p>
@@ -245,10 +309,11 @@ export default function Home() {
             {/* Botão de Ação (CTA) */}
             <div className="w-full sm:w-auto">
               <button 
-                onClick={handleWhatsApp}
+                type="button"
+                onClick={() => handleWhatsApp('hero')}
                 className="w-full sm:w-auto bg-[#059669] hover:bg-[#047857] text-white font-medium px-8 py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-slate-950/50 text-sm md:text-base"
               >
-                <MessageCircle className="w-5 h-5 text-emerald-100" />
+                <MessageCircle className="w-5 h-5 text-emerald-100" aria-hidden="true" />
                 <span>Agendar Consulta</span>
               </button>
             </div>
@@ -256,13 +321,10 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Fita de Texto Animada (Marquee) */}
-      <div className="bg-[#0b1120] py-3.5 overflow-hidden flex whitespace-nowrap items-center border-y border-slate-800/60 relative">
-        <motion.div 
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ repeat: Infinity, ease: "linear", duration: 30 }}
-          className="flex items-center"
-        >
+      <main>
+      {/* Fita de Texto Animada (Marquee CSS com suporte a prefers-reduced-motion) */}
+      <div aria-hidden="true" className="bg-[#0b1120] py-3.5 overflow-hidden flex whitespace-nowrap items-center border-y border-slate-800/60 relative">
+        <div className="flex items-center animate-marquee">
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="flex items-center shrink-0">
               <span className="text-slate-200 text-xs sm:text-sm md:text-base font-body tracking-wide font-light px-6 sm:px-10">
@@ -271,7 +333,7 @@ export default function Home() {
               <span className="w-1.5 h-1.5 rounded-full bg-amber-500/80 shadow-[0_0_6px_rgba(245,158,11,0.6)]"></span>
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
 
       {/* 3. Seção de Áreas de Atuação e Métricas - Fundo Off-White Nobre (#F8FAFC) */}
@@ -378,11 +440,12 @@ export default function Home() {
               Cada caso exige escuta, exame clínico e conduta médica individualizada.
             </p>
             <button 
-              onClick={handleWhatsApp}
+              type="button"
+              onClick={() => handleWhatsApp('para_quem_e')}
               className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium transition-colors shadow-sm"
             >
-              <span>Falar pelo Whatsapp</span>
-              <ArrowRight className="w-4 h-4 text-emerald-400" />
+              <span>Falar pelo WhatsApp</span>
+              <ArrowRight className="w-4 h-4 text-emerald-400" aria-hidden="true" />
             </button>
           </motion.div>
         </div>
@@ -813,15 +876,16 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="mt-16 text-center flex flex-col items-center gap-6"
           >
-            <p className="text-slate-500 text-xs md:text-sm uppercase tracking-widest font-medium text-center">
+            <p className="text-slate-600 text-xs md:text-sm uppercase tracking-widest font-medium text-center">
               Cada paciente exige escuta atenta, exame clínico detalhado e conduta personalizada.
             </p>
             <button 
-              onClick={handleWhatsApp}
+              type="button"
+              onClick={() => handleWhatsApp('especialidades')}
               className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium transition-colors shadow-sm"
             >
               <span>Avaliar meu caso</span>
-              <ArrowRight className="w-4 h-4 text-emerald-400" />
+              <ArrowRight className="w-4 h-4 text-emerald-400" aria-hidden="true" />
             </button>
           </motion.div>
         </div>
@@ -843,8 +907,10 @@ export default function Home() {
             {/* Moldura com cantos arredondados, leve sombra e imagem institucional de prestígio */}
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/60 aspect-[3/4] bg-slate-800">
               <img 
-                src="/secao-sobre.png" 
+                src="/secao-sobre.webp" 
                 alt="Dr. Alexandre Sávio - Médico Urologista em Goiânia" 
+                width={640}
+                height={1138}
                 loading="lazy"
                 decoding="async"
                 className="w-full h-full object-cover object-center relative z-10"
@@ -897,7 +963,8 @@ export default function Home() {
             </ul>
             
             <button 
-              onClick={handleWhatsApp} 
+              type="button"
+              onClick={() => handleWhatsApp('sobre_mim')} 
               className="border-2 border-[#1b344a] text-[#1b344a] font-medium px-8 py-3.5 rounded-full hover:bg-[#1b344a] hover:text-white transition-all duration-300 text-sm shadow-sm"
             >
               Conheça meu atendimento
@@ -935,8 +1002,17 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: 0.1 }}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={activeLocation === 'clinicas'}
                   onClick={() => setActiveLocation('clinicas')}
-                  className={`p-5 rounded-2xl border transition-all cursor-pointer ${
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setActiveLocation('clinicas');
+                    }
+                  }}
+                  className={`p-5 rounded-2xl border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400/70 ${
                     activeLocation === 'clinicas'
                       ? 'bg-white/[0.06] border-emerald-500/50 shadow-md ring-1 ring-emerald-500/20'
                       : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10'
@@ -989,8 +1065,17 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: 0.2 }}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={activeLocation === 'rim'}
                   onClick={() => setActiveLocation('rim')}
-                  className={`p-5 rounded-2xl border transition-all cursor-pointer ${
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setActiveLocation('rim');
+                    }
+                  }}
+                  className={`p-5 rounded-2xl border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400/70 ${
                     activeLocation === 'rim'
                       ? 'bg-white/[0.06] border-emerald-500/50 shadow-md ring-1 ring-emerald-500/20'
                       : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10'
@@ -998,7 +1083,7 @@ export default function Home() {
                 >
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                      <Building2 className="w-5 h-5 text-emerald-400" />
+                      <Building2 className="w-5 h-5 text-emerald-400" aria-hidden="true" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between gap-2 mb-1">
@@ -1015,7 +1100,8 @@ export default function Home() {
                         Hospital do Rim
                       </h3>
                       <p className="text-slate-300 text-sm leading-relaxed font-body">
-                        Alameda das Rosas, 2041 — Setor Oeste
+                        Alameda das Rosas, 2041 — Setor Oeste, Goiânia - GO<br />
+                        CEP: 74125-010
                       </p>
                       <p className="text-slate-300 text-sm leading-relaxed font-body mt-1">
                         Agendamentos pelo número:{' '}
@@ -1074,10 +1160,11 @@ export default function Home() {
               {/* Botões de Ação */}
               <div className="pt-6 border-t border-white/10 space-y-3">
                 <button 
-                  onClick={handleWhatsApp} 
+                  type="button"
+                  onClick={() => handleWhatsApp('contato_mapa')} 
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3.5 px-6 rounded-xl transition-all shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 text-sm transform hover:scale-[1.01] active:scale-[0.99]"
                 >
-                  <MessageCircle className="w-4 h-4" />
+                  <MessageCircle className="w-4 h-4" aria-hidden="true" />
                   <span>Agendar Consulta via WhatsApp</span>
                 </button>
 
@@ -1085,12 +1172,12 @@ export default function Home() {
                   href="https://www.doctoralia.com.br/alexandre-savio-oliveira-de-freitas/urologista/goiania" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  onClick={() => trackExternalClick('doctoralia')}
+                  onClick={() => trackDoctoraliaClick('contato_perfil')}
                   className="w-full bg-white/5 hover:bg-white/10 text-white border border-white/20 hover:border-emerald-400/40 font-medium py-3.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2.5 text-sm group"
                 >
-                  <Stethoscope className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                  <Stethoscope className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" aria-hidden="true" />
                   <span>Meu perfil no Doctoralia</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" />
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-300 group-hover:text-white transition-colors" aria-hidden="true" />
                 </a>
               </div>
             </div>
@@ -1102,6 +1189,7 @@ export default function Home() {
               <div className="p-3 bg-[#0d1a26] border-b border-white/10 flex flex-wrap items-center justify-between gap-2 z-10">
                 <div className="flex items-center gap-1.5 p-1 bg-white/5 rounded-xl border border-white/10">
                   <button
+                    type="button"
                     onClick={() => setActiveLocation('clinicas')}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                       activeLocation === 'clinicas'
@@ -1109,11 +1197,12 @@ export default function Home() {
                         : 'text-slate-300 hover:text-white hover:bg-white/5'
                     }`}
                   >
-                    <MapPin className="w-3.5 h-3.5" />
+                    <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
                     <span>Ed. das Clínicas</span>
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => setActiveLocation('rim')}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                       activeLocation === 'rim'
@@ -1121,7 +1210,7 @@ export default function Home() {
                         : 'text-slate-300 hover:text-white hover:bg-white/5'
                     }`}
                   >
-                    <Building2 className="w-3.5 h-3.5" />
+                    <Building2 className="w-3.5 h-3.5" aria-hidden="true" />
                     <span>Hospital do Rim</span>
                   </button>
                 </div>
@@ -1164,7 +1253,11 @@ export default function Home() {
           </div>
 
           {/* Widget de Agendamento Online Doctoralia */}
-          <div id="doctoralia-widget-container" className="mt-10 bg-white rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/10">
+          <div
+            id="doctoralia-widget-container"
+            onClick={registerDoctoraliaWidgetInteraction}
+            className="mt-10 bg-white rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/10"
+          >
             <a
               id="zl-url"
               className="zl-url"
@@ -1183,12 +1276,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. Perguntas Frequentes (FAQ) - Estilo Acordeão de Alta Classe e Indexável (Schema.org FAQPage) */}
-      <section 
-        itemScope 
-        itemType="https://schema.org/FAQPage"
-        className="py-24 px-6 bg-[#F8FAFC] border-t border-slate-200/80"
-      >
+      {/* 6. Perguntas Frequentes (FAQ) - Visível no DOM (JSON-LD único no index.html) */}
+      <section className="py-24 px-6 bg-[#F8FAFC] border-t border-slate-200/80">
         <div className="max-w-4xl mx-auto">
           
           <div className="text-center mb-16">
@@ -1199,33 +1288,31 @@ export default function Home() {
               Perguntas Frequentes
             </h2>
             <p className="text-slate-600 text-base md:text-lg font-light leading-relaxed max-w-2xl mx-auto">
-              Informações transparentes sobre o atendimento particular, consultas e procedimentos urológicos.
+              Informações transparentes sobre planos de saúde aceitos (Unimed, Geap Saúde, Caixa Saúde, AFFEGO, Itaú Saúde e outros), atendimento particular, consultas e procedimentos urológicos.
             </p>
           </div>
 
           <div className="space-y-4">
             {faqs.map((faq, index) => {
               const isOpen = openFaqIndex === index;
+              const panelId = `faq-panel-${index}`;
               return (
                 <div
                   key={index}
-                  itemScope
-                  itemProp="mainEntity"
-                  itemType="https://schema.org/Question"
                   className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm hover:border-slate-300 transition-all duration-300"
                 >
                   <button
+                    type="button"
                     onClick={() => toggleFaq(index)}
                     aria-expanded={isOpen}
+                    aria-controls={panelId}
                     className="w-full py-6 px-6 sm:px-8 text-left flex items-center justify-between gap-4 transition-colors hover:bg-slate-50/70"
                   >
-                    <h3 
-                      itemProp="name"
-                      className="font-heading font-semibold text-lg sm:text-xl md:text-2xl text-slate-900 leading-snug"
-                    >
+                    <h3 className="font-heading font-semibold text-lg sm:text-xl md:text-2xl text-slate-900 leading-snug">
                       {faq.question}
                     </h3>
                     <div
+                      aria-hidden="true"
                       className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border transition-all duration-300 ${
                         isOpen
                           ? 'bg-slate-900 text-white border-slate-900 rotate-180'
@@ -1238,9 +1325,7 @@ export default function Home() {
 
                   {/* Mantido sempre no DOM para indexação integral pelo Googlebot */}
                   <div
-                    itemScope
-                    itemProp="acceptedAnswer"
-                    itemType="https://schema.org/Answer"
+                    id={panelId}
                     aria-hidden={!isOpen}
                     className={`grid transition-all duration-300 ease-in-out ${
                       isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
@@ -1248,16 +1333,13 @@ export default function Home() {
                   >
                     <div className="overflow-hidden">
                       <div className="px-6 sm:px-8 pb-6 pt-1 border-t border-slate-100">
-                        <p 
-                          itemProp="text"
-                          className="font-body text-slate-600 text-sm sm:text-base leading-relaxed font-light"
-                        >
+                        <p className="font-body text-slate-700 text-sm sm:text-base leading-relaxed font-light">
                           {faq.answer}
                         </p>
 
                         {faq.plans && (
                           <div className="mt-5 pt-4 border-t border-slate-100">
-                            <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+                            <span className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-3">
                               Principais Planos de Saúde Atendidos:
                             </span>
                             <div className="flex flex-wrap gap-2 mb-4">
@@ -1266,7 +1348,7 @@ export default function Home() {
                                   key={plan}
                                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-900 text-xs sm:text-sm font-medium"
                                 >
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" aria-hidden="true" />
                                   {plan}
                                 </span>
                               ))}
@@ -1277,9 +1359,9 @@ export default function Home() {
                             <button
                               type="button"
                               onClick={() => handleWhatsApp('faq_planos')}
-                              className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-emerald-700 hover:text-emerald-800 underline underline-offset-4 transition-colors"
+                              className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-emerald-800 hover:text-emerald-900 underline underline-offset-4 transition-colors"
                             >
-                              <MessageCircle className="w-4 h-4" />
+                              <MessageCircle className="w-4 h-4" aria-hidden="true" />
                               <span>Clique aqui para consultar se o seu plano de saúde é aceito</span>
                             </button>
                           </div>
@@ -1303,32 +1385,34 @@ export default function Home() {
               </p>
             </div>
             <button
-              onClick={handleWhatsApp}
+              type="button"
+              onClick={() => handleWhatsApp('faq_rodape')}
               className="shrink-0 inline-flex items-center gap-2 bg-[#1b344a] hover:bg-[#142838] text-white text-sm font-medium px-6 py-3 rounded-full transition-all shadow-sm"
             >
-              <MessageCircle className="w-4 h-4 text-emerald-400" />
+              <MessageCircle className="w-4 h-4 text-emerald-400" aria-hidden="true" />
               <span>Falar no WhatsApp</span>
             </button>
           </div>
 
         </div>
       </section>
+      </main>
 
       {/* 7. Footer Legal com Área de Redes Sociais */}
-      <footer className="bg-[#132637] text-slate-300 pt-16 pb-12 px-6 border-t border-white/10">
+      <footer className="bg-[#132637] text-slate-200 pt-16 pb-12 px-6 border-t border-white/10">
         <div className="max-w-6xl mx-auto flex flex-col items-center text-center">
 
           {/* Área: Minhas Redes Sociais e Perfis Oficiais */}
           <div className="w-full max-w-4xl mb-12">
             <div className="flex flex-col items-center mb-6">
               <span className="text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
+                <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
                 Canais Oficiais
               </span>
-              <h3 className="text-white font-heading font-semibold text-xl md:text-2xl tracking-wide">
+              <h2 className="text-white font-heading font-semibold text-xl md:text-2xl tracking-wide">
                 Minhas Redes Sociais
-              </h3>
-              <p className="text-slate-400 text-xs md:text-sm mt-1.5 max-w-md font-light">
+              </h2>
+              <p className="text-slate-300 text-xs md:text-sm mt-1.5 max-w-md font-light">
                 Acompanhe orientações em urologia, rotina de atendimentos e veja opiniões de pacientes.
               </p>
             </div>
@@ -1343,15 +1427,15 @@ export default function Home() {
                 className="group relative flex items-center gap-3.5 p-4 rounded-2xl bg-white/5 hover:bg-white/[0.08] border border-white/10 hover:border-pink-500/40 transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-pink-950/20 hover:-translate-y-0.5"
               >
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-md group-hover:scale-105 transition-transform duration-300">
-                  <Instagram className="w-5 h-5" />
+                  <Instagram className="w-5 h-5" aria-hidden="true" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="font-semibold text-white text-sm">Instagram</span>
-                    <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-pink-300 transition-colors" />
+                    <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-pink-300 transition-colors" aria-hidden="true" />
                   </div>
-                  <p className="text-xs text-slate-400 truncate mt-0.5 font-light">@dralexandresaviouro</p>
-                  <span className="inline-block text-[11px] text-pink-400 font-medium mt-1">Acessar perfil &rarr;</span>
+                  <p className="text-xs text-slate-300 truncate mt-0.5 font-light">@dralexandresaviouro</p>
+                  <span className="inline-block text-[11px] text-pink-300 font-medium mt-1">Acessar perfil &rarr;</span>
                 </div>
               </a>
 
@@ -1360,19 +1444,19 @@ export default function Home() {
                 href="https://www.doctoralia.com.br/alexandre-savio-oliveira-de-freitas/urologista/goiania" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                onClick={() => trackExternalClick('doctoralia_footer')}
+                onClick={() => trackDoctoraliaClick('rodape_perfil')}
                 className="group relative flex items-center gap-3.5 p-4 rounded-2xl bg-white/5 hover:bg-white/[0.08] border border-white/10 hover:border-emerald-500/40 transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-emerald-950/20 hover:-translate-y-0.5"
               >
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shrink-0 shadow-md group-hover:scale-105 transition-transform duration-300">
-                  <Stethoscope className="w-5 h-5" />
+                  <Stethoscope className="w-5 h-5" aria-hidden="true" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="font-semibold text-white text-sm">Doctoralia</span>
-                    <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-emerald-300 transition-colors" />
+                    <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-emerald-300 transition-colors" aria-hidden="true" />
                   </div>
-                  <p className="text-xs text-slate-400 truncate mt-0.5 font-light">Perfil & Opiniões</p>
-                  <span className="inline-block text-[11px] text-emerald-400 font-medium mt-1">Ver perfil &rarr;</span>
+                  <p className="text-xs text-slate-300 truncate mt-0.5 font-light">Perfil & Opiniões</p>
+                  <span className="inline-block text-[11px] text-emerald-300 font-medium mt-1">Ver perfil &rarr;</span>
                 </div>
               </a>
 
@@ -1395,10 +1479,10 @@ export default function Home() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="font-semibold text-white text-sm">Perfil do Google</span>
-                    <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-blue-300 transition-colors" />
+                    <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-blue-300 transition-colors" aria-hidden="true" />
                   </div>
-                  <p className="text-xs text-slate-400 truncate mt-0.5 font-light">Avaliações & Rotas</p>
-                  <span className="inline-block text-[11px] text-blue-400 font-medium mt-1">Ver no Google &rarr;</span>
+                  <p className="text-xs text-slate-300 truncate mt-0.5 font-light">Avaliações & Rotas</p>
+                  <span className="inline-block text-[11px] text-blue-300 font-medium mt-1">Ver no Google &rarr;</span>
                 </div>
               </a>
             </div>
@@ -1409,15 +1493,15 @@ export default function Home() {
             <p className="text-sm font-semibold text-white mb-2">
               Dr. Alexandre Sávio — Médico Urologista | CRM-GO 5778
             </p>
-            <p className="text-xs max-w-3xl leading-relaxed mb-6 text-slate-400 font-light">
+            <p className="text-xs max-w-3xl leading-relaxed mb-6 text-slate-300 font-light">
               As informações contidas neste site têm caráter exclusivamente informativo e não substituem a consulta médica presencial. Em conformidade com o Manual de Publicidade Médica do CFM.
             </p>
-            <div className="flex items-center gap-4 text-xs font-medium text-slate-400 mb-6">
+            <div className="flex items-center gap-4 text-xs font-medium text-slate-300 mb-6">
               <Link to="/privacidade" className="hover:text-white transition-colors underline underline-offset-4">Política de Privacidade</Link>
-              <span>•</span>
+              <span aria-hidden="true">•</span>
               <Link to="/termos" className="hover:text-white transition-colors underline underline-offset-4">Termos de Atendimento</Link>
             </div>
-            <p className="text-xs text-slate-400 font-light">
+            <p className="text-xs text-slate-300 font-light">
               © {new Date().getFullYear()} Desenvolvido por MAGE Comunicação. Todos os direitos reservados.
             </p>
           </div>
@@ -1430,8 +1514,10 @@ export default function Home() {
           <div className="flex items-center gap-3">
              <div className="w-11 h-11 rounded-full overflow-hidden bg-slate-200 shrink-0 border border-slate-200 shadow-sm">
                <img 
-                 src="/fotoperfilalexandre.jpg" 
+                 src="/fotoperfilalexandre.webp" 
                  alt="Dr. Alexandre Sávio" 
+                 width={44}
+                 height={44}
                  loading="lazy"
                  decoding="async"
                  className="w-full h-full object-cover object-top" 
@@ -1439,14 +1525,15 @@ export default function Home() {
              </div>
              <div className="flex flex-col">
                <span className="font-semibold text-sm text-slate-900 leading-tight">Dr. Alexandre Sávio</span>
-               <span className="text-[10px] text-slate-500 font-normal">Particular e Convênios</span>
+               <span className="text-[11px] text-slate-600 font-normal">Particular e Convênios</span>
              </div>
           </div>
           <button 
-            onClick={handleWhatsApp} 
-            className="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2.5 rounded-full transition-colors text-xs shadow-md flex items-center gap-1.5"
+            type="button"
+            onClick={() => handleWhatsApp('barra_mobile')} 
+            className="shrink-0 bg-emerald-700 hover:bg-emerald-800 text-white font-medium px-4 py-2.5 rounded-full transition-colors text-xs shadow-md flex items-center gap-1.5"
           >
-             <MessageCircle className="w-3.5 h-3.5" />
+             <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
              <span>Agendar</span>
           </button>
         </div>
@@ -1456,6 +1543,7 @@ export default function Home() {
       <AnimatePresence>
         {showBackToTop && (
           <motion.button
+            type="button"
             onClick={scrollToTop}
             initial={{ opacity: 0, scale: 0.8, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1464,9 +1552,9 @@ export default function Home() {
             whileHover={{ scale: 1.08, y: -2 }}
             whileTap={{ scale: 0.95 }}
             aria-label="Voltar ao Topo"
-            className="fixed bottom-24 md:bottom-8 right-6 z-40 w-12 h-12 rounded-full bg-[#1b344a]/90 hover:bg-[#1b344a] text-white shadow-xl hover:shadow-2xl border border-white/20 backdrop-blur-md flex items-center justify-center transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+            className="fixed bottom-24 md:bottom-8 right-6 z-40 w-12 h-12 rounded-full bg-[#1b344a]/95 hover:bg-[#1b344a] text-white shadow-xl hover:shadow-2xl border border-white/20 flex items-center justify-center transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
           >
-            <ArrowUp className="w-5 h-5 text-slate-200 group-hover:text-emerald-400 group-hover:-translate-y-0.5 transition-all duration-200" />
+            <ArrowUp className="w-5 h-5 text-slate-200 group-hover:text-emerald-400 group-hover:-translate-y-0.5 transition-all duration-200" aria-hidden="true" />
           </motion.button>
         )}
       </AnimatePresence>

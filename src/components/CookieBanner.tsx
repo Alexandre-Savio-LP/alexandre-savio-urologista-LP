@@ -39,6 +39,7 @@ export default function CookieBanner() {
           </p>
           <div className="mt-3 flex items-center gap-3">
             <button
+              type="button"
               onClick={handleAccept}
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-1.5 rounded-lg text-xs transition-colors shadow-sm"
             >
@@ -46,7 +47,7 @@ export default function CookieBanner() {
             </button>
             <Link
               to="/privacidade"
-              className="text-slate-400 hover:text-slate-200 underline text-xs transition-colors"
+              className="text-slate-300 hover:text-white underline text-xs transition-colors"
             >
               Política de Privacidade
             </Link>
@@ -54,11 +55,12 @@ export default function CookieBanner() {
         </div>
 
         <button
+          type="button"
           onClick={handleAccept}
-          className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors -mr-1 -mt-1"
+          className="text-slate-300 hover:text-white p-1 rounded-lg transition-colors -mr-1 -mt-1"
           aria-label="Fechar aviso"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4" aria-hidden="true" />
         </button>
       </div>
     </aside>

@@ -1,32 +1,5 @@
 @import "tailwindcss";
 
-/* 
- * Suporte à fonte TT Backwards para os Títulos
- * Ao colocar o arquivo (.woff2, .otf ou .ttf) em /public/fonts/ como 'TTBackwards-Bold.woff2',
- * ele será carregado automaticamente.
- */
-@font-face {
-  font-family: "TT Backwards";
-  src: local("TT Backwards"),
-       local("TT Backwards Sans"),
-       local("TTBackwards"),
-       url("/fonts/TTBackwards-Bold.woff2") format("woff2");
-  font-weight: 600 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "TT Backwards";
-  src: local("TT Backwards"),
-       local("TT Backwards Sans"),
-       local("TTBackwards"),
-       url("/fonts/TTBackwards-Regular.woff2") format("woff2");
-  font-weight: 400 500;
-  font-style: normal;
-  font-display: swap;
-}
-
 @theme {
   /* Cores Principais */
   --color-brand-primary: #0f172a; /* slate-900 */
@@ -42,12 +15,9 @@
   --color-brand-bg-light: #F8FAFC; /* off-white nobre */
   --color-brand-bg-dark: #f1f5f9; /* slate-100 */
 
-  /* Fontes conforme identidade visual solicitada */
-  /* Títulos: TT Backwards (com fallback condensado Oswald) */
-  --font-heading: "TT Backwards", "TT Backwards Sans", "Oswald", sans-serif;
-  --font-serif-display: "TT Backwards", "TT Backwards Sans", "Oswald", sans-serif;
-
-  /* Textos e complementos: Poppins */
+  /* Fontes (Oswald para títulos condensados + Poppins para textos) */
+  --font-heading: "Oswald", sans-serif;
+  --font-serif-display: "Oswald", sans-serif;
   --font-body: "Poppins", sans-serif;
 }
 
@@ -61,5 +31,28 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
     letter-spacing: -0.01em;
+  }
+}
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  animation: marquee-scroll 30s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-marquee {
+    animation: none;
   }
 }

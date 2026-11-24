@@ -1,9 +1,29 @@
 # Robots.txt - Dr. Alexandre Sávio | Médico Urologista em Goiânia
 User-agent: *
 Allow: /
-
-# Desabilitar rastreamento de endpoints internos e assets de build
 Disallow: /api/
 
-# Sitemap index
-Sitemap: https://dralexandresavio.com.br/sitemap.xml
+# Liberação explícita para crawlers de IA e busca generativa
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Sitemap e contexto estruturado para agentes de IA
+Sitemap: https://alexandresaviourologista.vercel.app/sitemap.xml
